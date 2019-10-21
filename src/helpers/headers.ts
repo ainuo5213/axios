@@ -1,7 +1,10 @@
 /**
  * handle headers
  */
-import { isPlainObject } from './util'
+import { isPlainObject, deepMerge } from './util'
+import {
+  Method
+} from '../types'
 
 /**
  * 规范化请求头的名字
@@ -50,9 +53,24 @@ export function parseHeaders(headers: string): any {
   // 每一行的请求头以\r\n结束
   headers.split('\r\n').forEach(oneLine => {
     let [key, value] = oneLine.split(':')
-    key = key&& key.trim()
+    key = key && key.trim()
     value = value && value.trim()
     parsed[key] = value
   })
   return parsed
+}
+
+export function flattenHeaders(headers: any, method: Method): any {
+  if (!headers) {
+    return headers
+  }
+  headers = deepMerge(headers.common, headers[method], headers)
+
+  const methodsToDelete = ['delete', 'get', 'head', 'options', 'post', 'put', 'patch', 'common']
+
+  methodsToDelete.forEach(method => {
+    delete headers[method]
+  })
+
+  return headers
 }
