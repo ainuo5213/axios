@@ -108,7 +108,7 @@ axios({
     b: 2
   }
 }).then((res) => {
-  console.log(res)
+  // do nothing
 })
 
 axios({
@@ -120,5 +120,5 @@ axios({
     b: 4
   }
 }).then((res) => {
-  console.log(res)
+  // do nothing
 })

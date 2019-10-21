@@ -9,6 +9,8 @@ import { flattenHeaders } from '../helpers/headers'
  * @param config
  */
 export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromise {
+  // 首先查看config的token是否使用过，使用过则抛出异常
+  throwIfCancellationRequested(config)
   processConfig(config)
   return xhr(config).then((res: AxiosReponse) => {
     return transformResponseData(res)
@@ -39,6 +41,17 @@ function transformURL(config: AxiosRequestConfig): string {
  * @param res
  */
 function transformResponseData(res: AxiosReponse): AxiosReponse {
-  res.data = transform(res.data, res.headers, res.config.transformRequest)
+  res.data = transform(res.data, res.headers, res.config.transformResponse)
   return res
+}
+
+/**
+ * 取消请求
+ * @param config
+ */
+function throwIfCancellationRequested(config: AxiosRequestConfig): void {
+  // 如果当前请求配置了cancelToken，则取消
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested()
+  }
 }
