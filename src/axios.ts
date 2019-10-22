@@ -8,19 +8,33 @@ import Cancel, { isCancel } from './cancel/Cancel'
 
 function createInstance(config: AxiosRequestConfig): AxiosStatic {
   const context = new Axios(config)
-  // 将request取出来，然后给这个实例赋值get、post方法等等
   const instance = Axios.prototype.request.bind(context)
-  // 将context的方法等等赋值给instance
-  extend(context, instance)
+
+  extend(instance, context)
+
   return instance as AxiosStatic
 }
 
 const axios = createInstance(defaults)
-axios.create = function(config) {
+
+axios.create = function create(config) {
   return createInstance(mergeConfig(defaults, config))
 }
-// 取消请求
+
 axios.CancelToken = CancelToken
 axios.Cancel = Cancel
 axios.isCancel = isCancel
+
+axios.all = function all(promises) {
+  return Promise.all(promises)
+}
+
+axios.spread = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr)
+  }
+}
+
+axios.Axios = Axios
+
 export default axios

@@ -1,8 +1,6 @@
-import InterceptorManager from '../core/InterceptorManager'
-
 export type Method =
-  | 'GET'
   | 'get'
+  | 'GET'
   | 'delete'
   | 'DELETE'
   | 'head'
@@ -21,23 +19,18 @@ export interface AxiosRequestConfig {
   method?: Method
   data?: any
   params?: any
-  responseType?: XMLHttpRequestResponseType
   headers?: any
+  responseType?: XMLHttpRequestResponseType
   timeout?: number
-
-  [prooName: string]: any
-
   transformRequest?: AxiosTransformer | AxiosTransformer[]
   transformResponse?: AxiosTransformer | AxiosTransformer[]
-
   cancelToken?: CancelToken
+  baseURL?: string
+
+  [propName: string]: any
 }
 
-export interface AxiosTransformer {
-  (data: any, headers?: any): any
-}
-
-export interface AxiosReponse<T = any> {
+export interface AxiosResponse<T = any> {
   data: T
   status: number
   statusText: string
@@ -46,30 +39,23 @@ export interface AxiosReponse<T = any> {
   request: any
 }
 
-export interface AxiosPromise<T = any> extends Promise<AxiosReponse<T>> {
+export interface AxiosPromise<T = any> extends Promise<AxiosResponse<T>> {
 }
 
 export interface AxiosError extends Error {
   config: AxiosRequestConfig
-  code?: string | null
-  request: any
-  response: AxiosReponse
+  code?: string
+  request?: any
+  response?: AxiosResponse
   isAxiosError: boolean
-}
-
-export interface Interceptor {
-  request: InterceptorManager<AxiosRequestConfig>
-  response: InterceptorManager<AxiosReponse>
-}
-
-export interface Interceptors<T> {
-  resolved: ResolvedFn<T>
-  rejected?: RejectedFn
 }
 
 export interface Axios {
   defaults: AxiosRequestConfig
-  interceptor: Interceptor
+  interceptors: {
+    request: AxiosInterceptorManager<AxiosRequestConfig>
+    response: AxiosInterceptorManager<AxiosResponse>
+  }
 
   request<T = any>(config: AxiosRequestConfig): AxiosPromise<T>
 
@@ -86,6 +72,8 @@ export interface Axios {
   put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): AxiosPromise<T>
 
   patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): AxiosPromise<T>
+
+  getUri(config?: AxiosRequestConfig): string
 }
 
 export interface AxiosInstance extends Axios {
@@ -94,14 +82,32 @@ export interface AxiosInstance extends Axios {
   <T = any>(url: string, config?: AxiosRequestConfig): AxiosPromise<T>
 }
 
-export interface AxiosInterceptorsManager<T> {
+export interface AxiosClassStatic {
+  new(config: AxiosRequestConfig): Axios
+}
+
+export interface AxiosStatic extends AxiosInstance {
+  create(config?: AxiosRequestConfig): AxiosInstance
+
+  CancelToken: CancelTokenStatic
+  Cancel: CancelStatic
+  isCancel: (value: any) => boolean
+
+  all<T>(promises: Array<T | Promise<T>>): Promise<T[]>
+
+  spread<T, R>(callback: (...args: T[]) => R): (arr: T[]) => R
+
+  Axios: AxiosClassStatic
+}
+
+export interface AxiosInterceptorManager<T> {
   use(resolved: ResolvedFn<T>, rejected?: RejectedFn): number
 
   eject(id: number): void
 }
 
 export interface ResolvedFn<T> {
-  (value: T): T | Promise<T>
+  (val: T): T | Promise<T>
 }
 
 export interface RejectedFn {
@@ -112,15 +118,6 @@ export interface AxiosTransformer {
   (data: any, headers?: any): any
 }
 
-export interface AxiosStatic extends AxiosInstance {
-  create(config?: AxiosRequestConfig): AxiosInstance
-
-  CancelToken: CancelTokenStatic
-  Cancel: CancelStatic
-  isCancel: (value: any) => boolean
-}
-
-// Cancel类的实例类型
 export interface CancelToken {
   promise: Promise<Cancel>
   reason?: Cancel
@@ -128,12 +125,10 @@ export interface CancelToken {
   throwIfRequested(): void
 }
 
-// cancel方法的类型
 export interface Canceler {
   (message?: string): void
 }
 
-// cancel执行器的类型
 export interface CancelExecutor {
   (cancel: Canceler): void
 }
@@ -143,7 +138,6 @@ export interface CancelTokenSource {
   cancel: Canceler
 }
 
-// cancelToken的静态类型
 export interface CancelTokenStatic {
   new(executor: CancelExecutor): CancelToken
 

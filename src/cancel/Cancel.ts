@@ -1,9 +1,5 @@
-import {
-  Cancel
-} from '../types'
-
-export default class CancelMain implements Cancel {
-  message?: string
+export default class Cancel {
+  public message?: string
 
   constructor(message?: string) {
     this.message = message
@@ -11,5 +7,5 @@ export default class CancelMain implements Cancel {
 }
 
 export function isCancel(value: any): boolean {
-  return value instanceof CancelMain
+  return value instanceof Cancel
 }

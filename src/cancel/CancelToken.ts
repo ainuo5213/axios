@@ -1,50 +1,48 @@
-import { Canceler, CancelExecutor, CancelToken, CancelTokenSource } from '../types'
+import { CancelExecutor, Canceler, CancelTokenSource } from '../types'
+
 import Cancel from './Cancel'
 
 interface ResolvePromise {
   (reason?: Cancel): void
 }
 
-export default class CancelTokenMain implements CancelToken {
-
+export default class CancelToken {
   public promise: Promise<Cancel>
   public reason?: Cancel
 
-  constructor(executor: CancelExecutor) {
+  public constructor(executor: CancelExecutor) {
     let resolvePromise: ResolvePromise
-    // 当调用then方法时，promise变成决议resolve状态，此时可以通过executor取得this.reason
     this.promise = new Promise<Cancel>(resolve => {
       resolvePromise = resolve
     })
-    executor(message => {
+    let canceler: Canceler = (message: string | undefined) => {
       if (this.reason) {
         return
       }
-      // 得到reason
       this.reason = new Cancel(message)
-      // 将这个message返回resolve掉
       resolvePromise(this.reason)
-    })
-  }
-
-  /**
-   * 工厂方法，创建Cancel实例和当前的cancel方法，并将resolve的reason传递给cancel
-   */
-  public static source(): CancelTokenSource {
-    let cancel!: Canceler
-    const token = new CancelTokenMain(canceler => cancel = canceler)
-    return {
-      cancel,
-      token
     }
+    executor(canceler)
   }
 
   /**
-   * 当该请求的cancelToken已经使用过了，当直接抛出错误
+   * 如果请求取消之后再次发出请求时，抛出异常
    */
   public throwIfRequested(): void {
     if (this.reason) {
       throw this.reason
+    }
+  }
+
+  public static source(): CancelTokenSource {
+    let cancel!: Canceler
+    const token = new CancelToken(c => {
+      // 得到cancel方法，当执行cancel方法时，this.promise被决议，当发出请求时会调用then方法进而取消请求的发出
+      cancel = c
+    })
+    return {
+      cancel,
+      token
     }
   }
 }

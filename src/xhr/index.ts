@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, AxiosPromise, AxiosReponse } from '../types'
+import { AxiosRequestConfig, AxiosPromise, AxiosResponse } from '../types'
 import { parseHeaders } from '../helpers/headers'
 import { createError } from '../helpers/error'
 
@@ -6,9 +6,9 @@ import { createError } from '../helpers/error'
  * xhr的主函数
  * @param config
  */
-export default function xhr(config: AxiosRequestConfig): AxiosPromise {
+export default function index(config: AxiosRequestConfig): AxiosPromise {
   return new Promise((resolve, reject) => {
-    const { data = null, url, method = 'get', headers, responseType, timeout, cancelToken } = config
+    const { data = null, url, method = 'get', headers, responseType, timeout } = config
     const request = new XMLHttpRequest()
     // 如果设置了responseType，则设置xhr的responseType
     if (responseType) {
@@ -24,10 +24,10 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
       }
       // 设置返回的headers
       const responseHeaders = parseHeaders(request.getAllResponseHeaders())
-      // 判断返回数据：返回的数据格式依赖于responseType
+      // 判断返回数据：返回的数据依赖于responseType
       const responseData = responseType !== 'text' ? request.response : request.responseText
       // 设置返回的响应格式
-      const response: AxiosReponse = {
+      const response: AxiosResponse = {
         data: responseData,
         status: request.status,
         statusText: request.statusText,
@@ -58,20 +58,13 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
         request.setRequestHeader(name, headers[name])
       }
     })
-    // 如果配置了cancelToken，则将cancelToken决议，得到reason，取消请求
-    if (cancelToken) {
-      cancelToken.promise.then(reason => {
-        request.abort()
-        reject(reason)
-      })
-    }
     request.send(data)
 
     /**
      * 处理请求
      * @param response
      */
-    function handleResponse(response: AxiosReponse): void {
+    function handleResponse(response: AxiosResponse): void {
       // 成功的请求
       if (response.status >= 200 && response.status <= 300) {
         resolve(response)

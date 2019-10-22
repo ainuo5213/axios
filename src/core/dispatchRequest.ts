@@ -1,24 +1,21 @@
-import { AxiosRequestConfig, AxiosPromise, AxiosReponse } from '../types'
-import xhr from '../xhr'
-import transform from './transform'
-import { buildURL } from '../helpers/url'
+import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from '../types'
+import index from '../xhr'
+import { buildURL, isAbsoluteURL, combineURL } from '../helpers/url'
 import { flattenHeaders } from '../helpers/headers'
+import transform from './transform'
 
 /**
- * 派发请求
+ * xhr主函数
  * @param config
  */
 export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromise {
-  // 首先查看config的token是否使用过，使用过则抛出异常
   throwIfCancellationRequested(config)
   processConfig(config)
-  return xhr(config).then((res: AxiosReponse) => {
-    return transformResponseData(res)
-  })
+  return index(config).then(res => transformResponseData(res))
 }
 
 /**
- * handle config
+ * 处理config
  * @param config
  */
 function processConfig(config: AxiosRequestConfig): void {
@@ -28,29 +25,31 @@ function processConfig(config: AxiosRequestConfig): void {
 }
 
 /**
- * URL的转化
+ * 拼接URL
  * @param config
  */
-function transformURL(config: AxiosRequestConfig): string {
-  const { url, params } = config
+export function transformURL(config: AxiosRequestConfig): string {
+  let { url, params, baseURL } = config
+  if (baseURL && !isAbsoluteURL(url!)) {
+    url = combineURL(baseURL, url)
+  }
   return buildURL(url!, params)
 }
 
 /**
- * 响应数据的转化
+ * 处理响应的数据
  * @param res
  */
-function transformResponseData(res: AxiosReponse): AxiosReponse {
+function transformResponseData(res: AxiosResponse): AxiosResponse {
   res.data = transform(res.data, res.headers, res.config.transformResponse)
   return res
 }
 
 /**
- * 取消请求
+ * 调用cancel方法后，再次发出请求时，直接报错
  * @param config
  */
 function throwIfCancellationRequested(config: AxiosRequestConfig): void {
-  // 如果当前请求配置了cancelToken，则取消
   if (config.cancelToken) {
     config.cancelToken.throwIfRequested()
   }
