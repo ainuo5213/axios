@@ -1,6 +1,9 @@
 import { AxiosRequestConfig, AxiosPromise, AxiosResponse } from '../types'
 import { parseHeaders } from '../helpers/headers'
 import { createError } from '../helpers/error'
+import { isURLSameOrigin } from '../helpers/url'
+import { isFormData } from '../helpers/util'
+import cookie from '../helpers/cookie'
 
 /**
  * xhr的主函数
@@ -8,60 +11,17 @@ import { createError } from '../helpers/error'
  */
 export default function index(config: AxiosRequestConfig): AxiosPromise {
   return new Promise((resolve, reject) => {
-    const { data = null, url, method = 'get', headers, responseType, timeout } = config
+    const { data = null, url, method = 'get', headers, responseType, timeout, cancelToken, withCredentials, xsrfHeaderName, xsrfCookieName, onDownloadProgress, onUploadProgress } = config
     const request = new XMLHttpRequest()
-    // 如果设置了responseType，则设置xhr的responseType
-    if (responseType) {
-      request.responseType = responseType
-    }
-    request.onreadystatechange = function handleLoad() {
-      if (request.readyState !== 4) {
-        return
-      }
-      // status为0时表示未发送请求
-      if (request.status === 0) {
-        return
-      }
-      // 设置返回的headers
-      const responseHeaders = parseHeaders(request.getAllResponseHeaders())
-      // 判断返回数据：返回的数据依赖于responseType
-      const responseData = responseType !== 'text' ? request.response : request.responseText
-      // 设置返回的响应格式
-      const response: AxiosResponse = {
-        data: responseData,
-        status: request.status,
-        statusText: request.statusText,
-        headers: responseHeaders,
-        config,
-        request
-      }
-      handleResponse(response)
-    }
-    // 网络异常错误
-    request.onerror = function handleError() {
-      reject(createError('Network Error', config, null, request))
-    }
-    // 超时
-    request.ontimeout = function handleTimeout() {
-      reject(createError(`Timeout of ${timeout} ms exceed`, config, 'ECONNABORTED', request))
-    }
     request.open(method.toUpperCase(), url!, true)
-    if (timeout) {
-      request.timeout = timeout
-    }
-    // 添加头部要在open后和send前
-    Object.keys(headers).forEach(name => {
-      // 严谨判断
-      if (data === null && name.toLowerCase() === 'content-type') {
-        delete headers[name]
-      } else {
-        request.setRequestHeader(name, headers[name])
-      }
-    })
+    configureRequest()
+    addEvents()
+    processHeaders()
+    processCancel()
     request.send(data)
 
     /**
-     * 处理请求
+     * 处理响应
      * @param response
      */
     function handleResponse(response: AxiosResponse): void {
@@ -79,6 +39,104 @@ export default function index(config: AxiosRequestConfig): AxiosPromise {
             response
           )
         )
+      }
+    }
+
+    /**
+     * 配置请求
+     */
+    function configureRequest(): void {
+      // 如果设置了responseType，则设置xhr的responseType
+      if (responseType) {
+        request.responseType = responseType
+      }
+      if (timeout) {
+        request.timeout = timeout
+      }
+      if (withCredentials) {
+        request.withCredentials = withCredentials
+      }
+    }
+
+    /**
+     * 添加事件
+     */
+    function addEvents(): void {
+      // 网络异常错误
+      request.onerror = function handleError() {
+        reject(createError('Network Error', config, null, request))
+      }
+      // 超时
+      request.ontimeout = function handleTimeout() {
+        reject(createError(`Timeout of ${timeout} ms exceed`, config, 'ECONNABORTED', request))
+      }
+      // 下载进度监控
+      if (onDownloadProgress) {
+        request.onprogress = onDownloadProgress
+      }
+      // 上传进度监控
+      if (onUploadProgress) {
+        request.upload.onprogress = onUploadProgress
+      }
+      request.onreadystatechange = function handleLoad() {
+        if (request.readyState !== 4) {
+          return
+        }
+        // status为0时表示未发送请求
+        if (request.status === 0) {
+          return
+        }
+        // 设置返回的headers
+        const responseHeaders = parseHeaders(request.getAllResponseHeaders())
+        // 判断返回数据：返回的数据依赖于responseType
+        const responseData = responseType !== 'text' ? request.response : request.responseText
+        // 设置返回的响应格式
+        const response: AxiosResponse = {
+          data: responseData,
+          status: request.status,
+          statusText: request.statusText,
+          headers: responseHeaders,
+          config,
+          request
+        }
+        handleResponse(response)
+      }
+    }
+
+    /**
+     * 处理header
+     */
+    function processHeaders(): void {
+      if (isFormData(data)) {
+        delete headers['Content-Type']
+      }
+      if (withCredentials || isURLSameOrigin(url!) && xsrfCookieName && xsrfHeaderName) {
+        const xsrfValue = cookie.read(xsrfCookieName!)
+        console.log(xsrfValue)
+        if (xsrfValue) {
+          headers[xsrfHeaderName!] = xsrfValue
+        }
+      }
+      // 添加头部要在open后和send前
+      Object.keys(headers).forEach(name => {
+        // 严谨判断
+        if (data === null && name.toLowerCase() === 'content-type') {
+          delete headers[name]
+        } else {
+          request.setRequestHeader(name, headers[name])
+        }
+      })
+    }
+
+    /**
+     * 处理取消请求
+     */
+    function processCancel(): void {
+      if (cancelToken) {
+        cancelToken.promise.then(message => {
+          request.abort()
+          reject(message)
+        })
       }
     }
   })

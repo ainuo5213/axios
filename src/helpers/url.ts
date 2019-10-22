@@ -66,3 +66,30 @@ export function isAbsoluteURL(url: string): boolean {
 export function combineURL(baseURL: string, relativeURL?: string): string {
   return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL
 }
+
+/**
+ * 判断请求的URL和当前浏览器的位置是否同源
+ * @param requestURL
+ */
+export function isURLSameOrigin(requestURL: string): boolean {
+  const parsedOrigin = resolveURL(requestURL)
+  return parsedOrigin.protocol === currentOrigin.protocol && parsedOrigin.host === currentOrigin.host
+}
+
+const urlParsingNode = document.createElement('a')
+const currentOrigin = resolveURL(window.location.href)
+
+interface URLOrigin {
+  protocol: string
+  host: string
+}
+
+/**
+ * 通过传入的url赋值给a标签的href，然后解构出域名和协议
+ * @param url
+ */
+function resolveURL(url: string): URLOrigin {
+  urlParsingNode.setAttribute('href', url)
+  const { protocol, host } = urlParsingNode
+  return { protocol, host }
+}

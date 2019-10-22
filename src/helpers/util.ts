@@ -1,3 +1,5 @@
+import instantiate = WebAssembly.instantiate
+
 const toString = Object.prototype.toString
 
 export function isDate(val: any): val is Date {
@@ -36,4 +38,8 @@ export function deepMerge(...objs: any[]): any {
   })
 
   return result
+}
+
+export function isFormData(value: any): value is FormData {
+  return typeof value !== 'undefined' && value instanceof FormData
 }
