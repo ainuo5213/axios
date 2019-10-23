@@ -1,4 +1,3 @@
-import instantiate = WebAssembly.instantiate
 
 const toString = Object.prototype.toString
 
@@ -42,4 +41,8 @@ export function deepMerge(...objs: any[]): any {
 
 export function isFormData(value: any): value is FormData {
   return typeof value !== 'undefined' && value instanceof FormData
+}
+
+export function isURLSearchParams(params: any): params is URLSearchParams {
+  return typeof params !== 'undefined' && params instanceof URLSearchParams
 }

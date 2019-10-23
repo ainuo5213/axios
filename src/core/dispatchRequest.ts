@@ -29,11 +29,11 @@ function processConfig(config: AxiosRequestConfig): void {
  * @param config
  */
 export function transformURL(config: AxiosRequestConfig): string {
-  let { url, params, baseURL } = config
+  let { url, params, baseURL, paramsSerializer } = config
   if (baseURL && !isAbsoluteURL(url!)) {
     url = combineURL(baseURL, url)
   }
-  return buildURL(url!, params)
+  return buildURL(url!, params, paramsSerializer)
 }
 
 /**

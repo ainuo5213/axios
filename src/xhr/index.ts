@@ -11,7 +11,7 @@ import cookie from '../helpers/cookie'
  */
 export default function index(config: AxiosRequestConfig): AxiosPromise {
   return new Promise((resolve, reject) => {
-    const { data = null, url, method = 'get', headers, responseType, timeout, cancelToken, withCredentials, xsrfHeaderName, xsrfCookieName, onDownloadProgress, onUploadProgress } = config
+    const { data = null, url, method = 'get', headers, responseType, timeout, cancelToken, withCredentials, xsrfHeaderName, xsrfCookieName, onDownloadProgress, onUploadProgress, auth, validateStatus } = config
     const request = new XMLHttpRequest()
     request.open(method.toUpperCase(), url!, true)
     configureRequest()
@@ -26,7 +26,7 @@ export default function index(config: AxiosRequestConfig): AxiosPromise {
      */
     function handleResponse(response: AxiosResponse): void {
       // 成功的请求
-      if (response.status >= 200 && response.status <= 300) {
+      if (!validateStatus || validateStatus(response.status)) {
         resolve(response)
         // 失败的请求
       } else {
@@ -50,9 +50,11 @@ export default function index(config: AxiosRequestConfig): AxiosPromise {
       if (responseType) {
         request.responseType = responseType
       }
+      // 超时的时间
       if (timeout) {
         request.timeout = timeout
       }
+      // 跨域时，当添加withCredentials之后，会携带请求头里会携带cookie（默认跨域不会携带）
       if (withCredentials) {
         request.withCredentials = withCredentials
       }
@@ -110,12 +112,15 @@ export default function index(config: AxiosRequestConfig): AxiosPromise {
       if (isFormData(data)) {
         delete headers['Content-Type']
       }
+      // 通过配置的xsrfCookieName和xsrfHeaderName，去取cookie，若取到了，则将cookie以header和cookie的形式发送给服务端
       if (withCredentials || isURLSameOrigin(url!) && xsrfCookieName && xsrfHeaderName) {
         const xsrfValue = cookie.read(xsrfCookieName!)
-        console.log(xsrfValue)
         if (xsrfValue) {
           headers[xsrfHeaderName!] = xsrfValue
         }
+      }
+      if (auth) {
+        headers['Authorization'] = 'Basic ' + btoa(auth.username + ':' + auth.password)
       }
       // 添加头部要在open后和send前
       Object.keys(headers).forEach(name => {
