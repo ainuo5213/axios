@@ -1,32 +1,32 @@
 import axios from '../../src/index'
 
-axios.interceptor.request.use(config => {
+axios.interceptors.request.use(config => {
   config.headers.test += '1'
   return config
 })
-axios.interceptor.request.use(config => {
+axios.interceptors.request.use(config => {
   config.headers.test += '2'
   return config
 })
-axios.interceptor.request.use(config => {
+axios.interceptors.request.use(config => {
   config.headers.test += '3'
   return config
 })
 
-axios.interceptor.response.use(res => {
+axios.interceptors.response.use(res => {
   res.data += '1'
   return res
 })
-let interceptor = axios.interceptor.response.use(res => {
+let interceptor = axios.interceptors.response.use(res => {
   res.data += '2'
   return res
 })
-axios.interceptor.response.use(res => {
+axios.interceptors.response.use(res => {
   res.data += '3'
   return res
 })
 
-axios.interceptor.response.eject(interceptor)
+axios.interceptors.response.eject(interceptor)
 
 axios({
   url: '/interceptor/get',

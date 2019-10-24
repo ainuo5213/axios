@@ -34,6 +34,9 @@ export default class CancelToken {
     }
   }
 
+  /**
+   * 通过这个工厂函数，产生一个cancel方法（用来决议promise）和一个CancelToken类
+   */
   public static source(): CancelTokenSource {
     let cancel!: Canceler
     const token = new CancelToken(c => {

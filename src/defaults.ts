@@ -10,7 +10,8 @@ const defaults: AxiosRequestConfig = {
   headers: {
     common: {
       Accept: 'application/json, text/plain, */*'
-    }
+    },
+    'test-au': 'asd'
   },
 
   xsrfCookieName: 'COOKIE_XSRF_TOKEN',

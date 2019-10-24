@@ -11,7 +11,22 @@ import cookie from '../helpers/cookie'
  */
 export default function index(config: AxiosRequestConfig): AxiosPromise {
   return new Promise((resolve, reject) => {
-    const { data = null, url, method = 'get', headers, responseType, timeout, cancelToken, withCredentials, xsrfHeaderName, xsrfCookieName, onDownloadProgress, onUploadProgress, auth, validateStatus } = config
+    const {
+      data = null,
+      url,
+      method = 'get',
+      headers,
+      responseType,
+      timeout,
+      cancelToken,
+      withCredentials,
+      xsrfHeaderName,
+      xsrfCookieName,
+      onDownloadProgress,
+      onUploadProgress,
+      auth,
+      validateStatus
+    } = config
     const request = new XMLHttpRequest()
     request.open(method.toUpperCase(), url!, true)
     configureRequest()
@@ -112,7 +127,8 @@ export default function index(config: AxiosRequestConfig): AxiosPromise {
       if (isFormData(data)) {
         delete headers['Content-Type']
       }
-      // 通过配置的xsrfCookieName和xsrfHeaderName，去取cookie，若取到了，则将cookie以header和cookie的形式发送给服务端
+      // 通过配置的xsrfCookieName和xsrfHeaderName，去取cookie，若取到了，
+      // 则将cookie以header和cookie的形式发送给服务端
       if (withCredentials || isURLSameOrigin(url!) && xsrfCookieName && xsrfHeaderName) {
         const xsrfValue = cookie.read(xsrfCookieName!)
         if (xsrfValue) {

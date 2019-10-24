@@ -57,8 +57,11 @@ export function buildURL(url: string, params?: any, paramsSerializer?: (params: 
   if (markIndex !== -1) {
     url = url.slice(0, markIndex)
   }
-
-  url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams
+  if (serializedParams === '') {
+    url += serializedParams
+  } else {
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams
+  }
 
   return url
 }

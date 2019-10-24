@@ -64,6 +64,7 @@ export default class Axios {
 
     while (chain.length) {
       const { resolved, rejected } = chain.shift()!
+      // 决议dispatchRequest方法发出请求，然后将这个promise返回
       promise = promise.then(resolved, rejected)
     }
 
