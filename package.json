@@ -1,11 +1,12 @@
 {
-  "name": "axios-ts",
+  "name": "axios-ts-ainuo",
   "version": "0.0.0",
   "description": "",
-  "keywords": [],
-  "main": "dist/axios-ts.umd.js",
-  "module": "dist/axios-ts.es5.js",
-  "typings": "dist/types/axios-ts.d.ts",
+  "private": false,
+  "keywords": ["axios", "axios-ts"],
+  "main": "dist/axios.umd.js",
+  "module": "dist/axios.es5.js",
+  "typings": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
@@ -33,7 +34,9 @@
     "semantic-release-prepare": "ts-node tools/semantic-release-prepare",
     "precommit": "lint-staged",
     "travis-deploy-once": "travis-deploy-once",
-    "dev": "node ./examples/server.js"
+    "dev": "node ./examples/server.js",
+    "prepub": "npm run test:prod && npm run build",
+    "pub": "sh relase.sh"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": [

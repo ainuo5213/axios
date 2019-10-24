@@ -11,11 +11,10 @@ const defaults: AxiosRequestConfig = {
     common: {
       Accept: 'application/json, text/plain, */*'
     },
-    'test-au': 'asd'
   },
 
-  xsrfCookieName: 'COOKIE_XSRF_TOKEN',
-  xsrfHeaderName: 'HEADER_XSRF_TOKEN',
+  // xsrfCookieName: 'COOKIE_XSRF_TOKEN',
+  // xsrfHeaderName: 'HEADER_XSRF_TOKEN',
 
   transformRequest: [
     function(data: any, headers: any): any {

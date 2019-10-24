@@ -2,52 +2,44 @@ import { parseHeaders, processHeaders, flattenHeaders } from '../../src/helpers/
 
 describe('helpers:header', () => {
   describe('parseHeaders', () => {
-    test('should parse header', () => {
+    test('should parse headers', () => {
       const parsed = parseHeaders(
         'Content-Type: application/json\r\n' +
-        'Connection: keep-alive\r\n' +
-        'Transfer-Encoding: chunked\r\n' +
-        'Date: Tue, 21 May 2019 09:23:44 GMT\r\n' +
-        ':aa\r\n' +
-        'key:'
+          'Connection: keep-alive\r\n' +
+          'Transfer-Encoding: chunked\r\n' +
+          'Date: Tue, 21 May 2019 09:23:44 GMT\r\n' +
+          ':aa\r\n' +
+          'key:'
       )
+
       expect(parsed['content-type']).toBe('application/json')
       expect(parsed['connection']).toBe('keep-alive')
       expect(parsed['transfer-encoding']).toBe('chunked')
       expect(parsed['date']).toBe('Tue, 21 May 2019 09:23:44 GMT')
       expect(parsed['key']).toBe('')
-      expect(parsed).toEqual({
-        'content-type': 'application/json',
-        'connection': 'keep-alive',
-        'transfer-encoding': 'chunked',
-        'date': 'Tue, 21 May 2019 09:23:44 GMT',
-        'key': ''
-      })
     })
+
     test('should return empty object if headers is empty string', () => {
       expect(parseHeaders('')).toEqual({})
     })
   })
+
   describe('processHeaders', () => {
     test('should normalize Content-Type header name', () => {
       const headers: any = {
         'conTenT-Type': 'foo/bar',
-        'Content-Length': 1024
+        'Content-length': 1024
       }
       processHeaders(headers, {})
       expect(headers['Content-Type']).toBe('foo/bar')
       expect(headers['conTenT-Type']).toBeUndefined()
-      expect(headers['Content-Length']).toBe(1024)
+      expect(headers['Content-length']).toBe(1024)
     })
+
     test('should set Content-Type if not set and data is PlainObject', () => {
       const headers: any = {}
       processHeaders(headers, { a: 1 })
       expect(headers['Content-Type']).toBe('application/json;charset=utf-8')
-    })
-    test('should set Content-Type if not set and data is undefined', () => {
-      const headers: any = {}
-      processHeaders(headers,undefined)
-      expect(headers['Content-Type']).toBeUndefined()
     })
 
     test('should not set Content-Type if not set and data is not PlainObject', () => {
@@ -61,6 +53,7 @@ describe('helpers:header', () => {
       expect(processHeaders(null, {})).toBeNull()
     })
   })
+
   describe('flattenHeaders', () => {
     test('should flatten the headers and include common headers', () => {
       const headers = {
@@ -102,4 +95,3 @@ describe('helpers:header', () => {
     })
   })
 })
-

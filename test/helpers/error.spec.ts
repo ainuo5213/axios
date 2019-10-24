@@ -1,7 +1,7 @@
 import { createError } from '../../src/helpers/error'
 import { AxiosRequestConfig, AxiosResponse } from '../../src/types'
 
-describe('helpers:error', function() {
+describe('helpers::error', function() {
   test('should create an Error with message, config, code, request, response and isAxiosError', () => {
     const request = new XMLHttpRequest()
     const config: AxiosRequestConfig = { method: 'post' }
@@ -13,13 +13,13 @@ describe('helpers:error', function() {
       config,
       data: { foo: 'bar' }
     }
-    const errorNormal = createError('Boom!', config, 'SOMETHING', request, response)
-    expect(errorNormal instanceof Error).toBeTruthy()
-    expect(errorNormal.message).toBe('Boom!')
-    expect(errorNormal.config).toBe(config)
-    expect(errorNormal.code).toBe('SOMETHING')
-    expect(errorNormal.request).toBe(request)
-    expect(errorNormal.response).toBe(response)
-    expect(errorNormal.isAxiosError).toBeTruthy()
+    const error = createError('Boom!', config, 'SOMETHING', request, response)
+    expect(error instanceof Error).toBeTruthy()
+    expect(error.message).toBe('Boom!')
+    expect(error.config).toBe(config)
+    expect(error.code).toBe('SOMETHING')
+    expect(error.request).toBe(request)
+    expect(error.response).toBe(response)
+    expect(error.isAxiosError).toBeTruthy()
   })
 })

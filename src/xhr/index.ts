@@ -157,6 +157,9 @@ export default function index(config: AxiosRequestConfig): AxiosPromise {
         cancelToken.promise.then(message => {
           request.abort()
           reject(message)
+        }).catch(() => {
+          /*istanbul ignore next*/
+          // do nothing
         })
       }
     }

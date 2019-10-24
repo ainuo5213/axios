@@ -4,7 +4,7 @@ import {
   isFormData,
   isURLSearchParams,
   extend,
-  deepMerge,
+  deepMerge
 } from '../../src/helpers/util'
 
 describe('helpers:util', () => {
@@ -114,5 +114,4 @@ describe('helpers:util', () => {
       expect(deepMerge({ foo: 123 }, null)).toEqual({ foo: 123 })
     })
   })
-
 })
